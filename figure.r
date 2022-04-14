@@ -9,6 +9,7 @@ library("lme4")
 library("glmmTMB")
 library("gamm4")
 
+run_date_guess = as.Date("2020-07-31")
 date_of_all = format(seq(as.Date("2020-04-18"), as.Date(("2020-07-31")), by = "days"),"%m-%d-%Y")
 
 results_list = mclapply(date_of_all, function(date_of_study){
@@ -30,20 +31,20 @@ results_list = mclapply(date_of_all, function(date_of_study){
   #covid_us[covid_us$Admin2=="Dukes and Nantucket",]$FIPS = "25007"
   #covid_us[covid_us$Admin2=="Weber-Morgan",]$FIPS = "49057"
   # Import exposure PM2.5 data
-  #county_pm = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_pm25.csv"))
-  if (pm_data %in% c("P3","P4")){
-    county_pm = read.csv("/Users/apple/Dropbox/COVID19/covid19/counties/rough_county_ywei/rough_county_pm25.csv")
-  }else if (pm_data %in% c("P1","P2")){
-    county_pm = read.csv("/Users/apple/Dropbox/COVID19/covid19/counties/rough_county_rm/rough_county_pm25.csv")
-  }
+  county_pm = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_pm25.csv"))
+  # if (pm_data %in% c("P3","P4")){
+  #   county_pm = read.csv("/Users/apple/Dropbox/COVID19/covid19/counties/rough_county_ywei/rough_county_pm25.csv")
+  # }else if (pm_data %in% c("P1","P2")){
+  #   county_pm = read.csv("/Users/apple/Dropbox/COVID19/covid19/counties/rough_county_rm/rough_county_pm25.csv")
+  # }
   
   county_temp = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/temp_seasonal_county.csv"))
   # Import census, brfss, testing, mortality, hosptial beds data as potential confounders
-  #county_census = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/census_county_interpolated.csv"))
-  county_census = read.csv("/Users/apple/Dropbox/COVID19/covid19/census_county_interpolated.csv")
+  county_census = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/census_county_interpolated.csv"))
+  # county_census = read.csv("/Users/apple/Dropbox/COVID19/covid19/census_county_interpolated.csv")
   #county_brfss = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/brfss_county_interpolated.csv"))
-  #county_brfss<-read.csv(text=getURL("https://www.countyhealthrankings.org/sites/default/files/media/document/analytic_data2020.csv"),skip = 1)
-  county_brfss<-read.csv("/Users/apple/Dropbox/COVID19/covid19/analytic_data2020.csv",skip=1)
+  county_brfss<-read.csv(text=getURL("https://www.countyhealthrankings.org/sites/default/files/media/document/analytic_data2020.csv"),skip = 1)
+  # county_brfss<-read.csv("/Users/apple/Dropbox/COVID19/covid19/analytic_data2020.csv",skip=1)
   county_brfss<-county_brfss[,c('fipscode','v011_rawvalue','v009_rawvalue')]
   names(county_brfss)<-c('fips','obese','smoke')
   county_brfss$fips = str_pad(county_brfss$fips, 5, pad = "0")
@@ -55,15 +56,15 @@ results_list = mclapply(date_of_all, function(date_of_study){
   state_test = subset(state_test, date ==paste0(substring(str_remove_all(date_of_study, "-"),5,8),substring(str_remove_all(date_of_study, "-"),1,4)))[, - 38]
   statecode = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/statecode.csv"))
   
-  #hospitals = read.csv(text=getURL("https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"))
-  hospitals = read.csv("/Users/apple/Dropbox/COVID19/covid19/Hospitals.csv")
+  hospitals = read.csv(text=getURL("https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"))
+  # hospitals = read.csv("/Users/apple/Dropbox/COVID19/covid19/Hospitals.csv")
   hospitals$BEDS[hospitals$BEDS < 0] = NA
   
   county_base_mortality = read.table(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_base_mortality.txt"), sep = "",header = T)
   county_old_mortality = read.table(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_old_mortality.txt"), sep = "",header = T)
-  county_014_mortality = read.table("/Users/apple/Dropbox/COVID19/covid19/county_014_mortality.txt", sep = "",header = T)
-  county_1544_mortality = read.table("/Users/apple/Dropbox/COVID19/covid19/county_1544_mortality.txt", sep = "",header = T)
-  county_4564_mortality = read.table("/Users/apple/Dropbox/COVID19/covid19/county_4564_mortality.txt", sep = "",header = T)
+  county_014_mortality = read.table("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_014_mortality.txt", sep = "",header = T)
+  county_1544_mortality = read.table("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_1544_mortality.txt", sep = "",header = T)
+  county_4564_mortality = read.table("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_4564_mortality.txt", sep = "",header = T)
   
   colnames(county_old_mortality)[4] = c("older_Population")
   colnames(county_014_mortality)[4] = c("014_Population")
@@ -85,7 +86,7 @@ results_list = mclapply(date_of_all, function(date_of_study){
   county_base_mortality$"young_pecent"[is.na(county_base_mortality$"young_pecent")] = 0
   
   # Import NCHS Urban-Rural Classification Scheme for Counties
-  NCHSURCodes2013 = read.csv("/Users/apple/Dropbox/COVID19/covid19/NCHSURCodes2013.csv")
+  NCHSURCodes2013 = read.csv("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/NCHSURCodes2013.csv")
   NCHSURCodes2013$FIPS = str_pad(NCHSURCodes2013$FIPS, 5, pad = "0")
   
   # Import FB survey on covid-like sympton data
@@ -94,17 +95,17 @@ results_list = mclapply(date_of_all, function(date_of_study){
   
   # merging data
   state_test = merge(state_test,statecode,by.x = "state" ,by.y = "Code" )
-  state_policy = read.csv("/Users/apple/Dropbox/COVID19/covid19/state_policy0515.csv")
+  state_policy = read.csv("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/state_policy0410.csv")
   colnames(state_policy)[6] = "stay_at_home"
   colnames(state_policy)[7] = "relax_stay_at_home"
   colnames(state_policy)[8] = "close_business"
   colnames(state_policy)[9] = "reopen_business"
   
   state_test = merge(state_test,state_policy[,c(1,6,7,8,9)],by = "State")
-  state_test$date_since_social = as.numeric(as.Date(Sys.Date()) - as.Date((strptime(state_test$stay_at_home, "%m/%d/%y"))))
-  state_test$date_since_relax = as.numeric(as.Date(Sys.Date()) - as.Date((strptime(state_test$relax_stay_at_home, "%m/%d/%y"))))
-  state_test$close_business = as.numeric(as.Date(Sys.Date()) - as.Date((strptime(state_test$close_business, "%m/%d/%y"))))
-  state_test$reopen_business = as.numeric(as.Date(Sys.Date()) - as.Date((strptime(state_test$reopen_business, "%m/%d/%y"))))
+  state_test$date_since_social = as.numeric(run_date_guess - as.Date((strptime(state_test$stay_at_home, "%m/%d/%y"))))
+  state_test$date_since_relax = as.numeric(run_date_guess - as.Date((strptime(state_test$relax_stay_at_home, "%m/%d/%y"))))
+  state_test$close_business = as.numeric(run_date_guess - as.Date((strptime(state_test$close_business, "%m/%d/%y"))))
+  state_test$reopen_business = as.numeric(run_date_guess - as.Date((strptime(state_test$reopen_business, "%m/%d/%y"))))
   
   state_test[is.na(state_test$date_since_social)==T,]$date_since_social = 0
   state_test[is.na(state_test$date_since_relax)==T,]$date_since_relax = 0
