@@ -12,7 +12,7 @@ library("gamm4")
 run_date_guess = as.Date("2020-07-31")
 date_of_all = format(seq(as.Date("2020-04-18"), as.Date(("2020-07-31")), by = "days"),"%m-%d-%Y")
 
-results_list = mclapply(date_of_all, function(date_of_study){
+analyze_one_date = function(date_of_study){
   pm_data = "P1"
   #date_of_study = "06-08-2020"
   # Historical data
@@ -281,13 +281,15 @@ return(c(exp(summary(glmmTMB.off.main)[6]$coefficients$cond[2,1]),
 #         exp(gamm.off.main$gam$coefficients[2]-1.96*summary(gamm.off.main$gam)$se[2]),
 #         exp(gamm.off.main$gam$coefficients[2]+1.96*summary(gamm.off.main$gam)$se[2])))
 }
-,mc.cores = 14)
 
+analyze_one_date("06-08-2020") == c(
+    1.1036138727616049415,
+    1.0462217782277640765,
+    1.1641542983506079079
+)
 
-results = do.call("cbind",results_list)
-date_of_all = date_of_all
-plot(1:length(date_of_all),results[1,1:length(date_of_all)],type="l",ylim=c(0.95,1.2), xaxt="n",xlab="Date",ylab = "Mortality Risk Ratios" ,main = "Daily Mortality Risk Ratios")
-axis(1, at = 1:length(date_of_all), lab = sapply(date_of_all,function(date){substring(date,1,5)}))
-lines(1:length(date_of_all),results[2,1:length(date_of_all)])
-lines(1:length(date_of_all),results[3,1:length(date_of_all)])
-abline(h=1, lty = 3)
+analyze_one_date("07-31-2020") == c(
+    1.0931452439304381041,
+    1.0493284989811466623,
+    1.1387916419767485365
+)
